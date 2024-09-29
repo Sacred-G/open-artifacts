@@ -36,7 +36,7 @@ export const SideNavBar = () => {
       <div className="h-screen max-h-screen overflow-hidden flex flex-col gap-4 justify-between px-2 py-2 pb-4 bg-slate-50 w-[200px]">
         <div className="flex flex-col gap-2">
           <Link href="/" className="text-lg font-semibold text-center">
-            Open Artifacts
+            BouldinGPT
           </Link>
 
           <div className="flex items-center justify-between gap-2">
@@ -73,7 +73,7 @@ export const SideNavBar = () => {
 
         <div className="flex flex-col gap-4 mt-2">
           <a
-            href="https://github.com/13point5/open-artifacts"
+            href="https://github.com/Sacred-G/BouldinGPT"
             target="_blank"
             className="text-black flex items-center gap-4 px-1"
           >
@@ -109,13 +109,13 @@ export const SideNavBar = () => {
 
       <div className="flex flex-col items-center gap-4">
         <a
-          href="https://github.com/13point5/open-artifacts"
+          href="https://github.com/Sacred_G/BouldinGPT"
           target="_blank"
           className="text-black"
         >
           <Image src="/github.svg" height="24" width="24" alt="github logo" />
         </a>
-        <UserSettings />
+        <UserSettings showLabel={true} />
         <UserButton />
       </div>
     </div>

@@ -70,6 +70,7 @@ export const createChat = async (
   return data[0];
 };
 
+
 export const addMessage = async (
   supabase: SupabaseContextType["supabase"],
   chatId: string | null,
@@ -78,12 +79,14 @@ export const addMessage = async (
 ) => {
   if (!chatId) return message;
 
-  const { error } = await supabase.from("messages").insert({
-    chat_id: chatId,
-    role: message.role,
-    text: message.content,
-    attachments,
-  });
+  const { error } = await supabase
+    .from("messages")
+    .insert({
+      chat_id: chatId,
+      role: message.role,
+      content: message.content,
+      attachments,
+    });
 
   if (error) {
     console.error(error);
@@ -92,3 +95,6 @@ export const addMessage = async (
 
   return message;
 };
+
+
+

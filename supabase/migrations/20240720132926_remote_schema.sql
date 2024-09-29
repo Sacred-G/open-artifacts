@@ -25,7 +25,7 @@ CREATE EXTENSION IF NOT EXISTS "pgjwt" WITH SCHEMA "extensions";
 CREATE EXTENSION IF NOT EXISTS "supabase_vault" WITH SCHEMA "vault";
 
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp" WITH SCHEMA "extensions";
-
+CREATE EXTENSION IF NOT EXISTS vector;
 CREATE OR REPLACE FUNCTION "public"."handle_new_user"() RETURNS "trigger"
     LANGUAGE "plpgsql" SECURITY DEFINER
     AS $$
@@ -153,7 +153,14 @@ GRANT ALL ON SEQUENCE "public"."messages_id_seq" TO "service_role";
 GRANT ALL ON TABLE "public"."profiles" TO "anon";
 GRANT ALL ON TABLE "public"."profiles" TO "authenticated";
 GRANT ALL ON TABLE "public"."profiles" TO "service_role";
+CREATE TABLE IF NOT EXISTS embeddings (
+    id BIGSERIAL PRIMARY KEY,
+    content TEXT NOT NULL,
+    embedding vector(1536)
+);
 
+-- Create an index for faster similarity search
+CREATE INDEX ON embeddings USING ivfflat (embedding vector_cosine_ops) WITH (lists = 100);
 ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT ALL ON SEQUENCES  TO "postgres";
 ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT ALL ON SEQUENCES  TO "anon";
 ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT ALL ON SEQUENCES  TO "authenticated";
@@ -170,3 +177,15 @@ ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT ALL ON TAB
 ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT ALL ON TABLES  TO "service_role";
 
 RESET ALL;
+CREATE TABLE IF NOT EXISTS stored_pdfs (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  file_name TEXT NOT NULL,
+  content TEXT NOT NULL,
+  created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+
+CREATE TABLE public.pdfs (
+  id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+  file_name TEXT NOT NULL,
+  file_path TEXT NOT NULL);

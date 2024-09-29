@@ -28,25 +28,34 @@ import {
   updateSettings,
 } from "@/lib/userSettings";
 import toast from "react-hot-toast";
+import { useState, useEffect } from "react";
 
 type Props = {
   showLabel?: boolean;
 };
 
 export const UserSettings = ({ showLabel = false }: Props) => {
+  const [settings, setSettings] = useState<SettingsSchema | null>(null);
+
+  useEffect(() => {
+    setSettings(getSettings());
+  }, []);
+
   const form = useForm<SettingsSchema>({
     resolver: zodResolver(settingsSchema),
-    defaultValues: getSettings(),
+    values: settings || undefined,
   });
 
   function onSubmit(values: SettingsSchema) {
-    updateSettings({
-      ...getSettings(),
-      ...values,
-    });
+    updateSettings(values);
+    setSettings(values);
     toast.success("Saved settings!", {
       position: "bottom-center",
     });
+  }
+
+  if (!settings) {
+    return null; // or a loading spinner
   }
 
   return (

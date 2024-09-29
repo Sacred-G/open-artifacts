@@ -18,8 +18,9 @@ export const AttachmentPreviewButton = ({ value, onRemove }: Props) => {
     <div className="group relative inline-block text-sm text-token-text-primary">
       <div className="relative overflow-hidden rounded-xl border border-token-border-light bg-token-main-surface-primary h-14 w-14">
         <button
-          className="h-full w-full"
-          onClick={() => setIsPreviewOpen(true)}
+        className="h-full w-full"
+        onClick={() => setIsPreviewOpen(true)}
+        title={`Attachment preview for ${value.name}`}
         >
           <span
             style={{
@@ -32,10 +33,12 @@ export const AttachmentPreviewButton = ({ value, onRemove }: Props) => {
 
       {onRemove && (
         <button
-          onClick={() => onRemove(value)}
-          className="bg-white absolute right-1 top-1 -translate-y-1/2 translate-x-1/2 rounded-full border border-token-border-heavy bg-token-main-surface-secondary p-0.5 text-token-text-primary transition-colors hover:opacity-100 group-hover:opacity-100 md:opacity-0"
-        >
-          <XIcon className="w-4 h-4" />
+  type='button'
+  onClick={() => onRemove(value)}
+  className="bg-white absolute right-1 top-1 -translate-y-1/2 translate-x-1/2 rounded-full border border-token-border-heavy bg-token-main-surface-secondary p-0.5 text-token-text-primary transition-colors hover:opacity-100 group-hover:opacity-100 md:opacity-0"
+  title="Remove attachment"
+>
+  <XIcon className="w-4 h-4" />
         </button>
       )}
 

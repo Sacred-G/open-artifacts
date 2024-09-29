@@ -17,6 +17,7 @@ export type Attachment = {
   contentType?: string;
   url: string;
   name?: string;
+  text?: string; // Add this line
 };
 
 export enum OAuthProviders {

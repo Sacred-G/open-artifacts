@@ -4,8 +4,8 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    --background: 113 122 23 0% 100%;
+    --foreground: 123.2 84% 4.9%;
     --card: 0 0% 100%;
     --card-foreground: 222.2 84% 4.9%;
     --popover: 0 0% 100%;
@@ -72,4 +72,9 @@
   #menu-toggle:checked + nav {
     display: flex;
   }
+}
+
+.flex-grow{
+  background:lightsteelblue;
+  flex-grow:1;
 }

@@ -6,7 +6,7 @@ import {
 } from "@supabase/auth-helpers-nextjs";
 import { useRouter } from "next/navigation";
 import { createContext, useEffect, useState } from "react";
-
+import React from 'react'
 import { SupabaseContextType } from "./types";
 
 export const SupabaseContext = createContext<SupabaseContextType | undefined>(

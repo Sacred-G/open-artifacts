@@ -115,7 +115,7 @@ const SignUpForm = () => {
   return (
     <main className="flex flex-col gap-6 items-center w-full h-screen pt-8 px-4">
       <Link href="/">
-        <h1 className="text-4xl font-bold">Open Artifacts</h1>
+        <h1 className="text-4xl font-bold">LegalEZ</h1>
       </Link>
 
       <Card className="max-w-sm w-full">

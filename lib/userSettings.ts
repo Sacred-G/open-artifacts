@@ -18,6 +18,10 @@ const defaultSettings: SettingsSchema = {
 };
 
 export const getSettings = (): SettingsSchema => {
+  if (typeof window === 'undefined') {
+    return defaultSettings;
+  }
+
   const storedSettings = window.localStorage.getItem(settingsLocalStorageKey);
 
   if (!storedSettings) {
@@ -39,7 +43,7 @@ export const getSettings = (): SettingsSchema => {
       !Object.values(Models).includes(mergedSettings.model)
     ) {
       console.warn(
-        `Invalid model value: ${mergedSettings.model}. Resetting to null.`
+        `Invalid model value: ${mergedSettings.model}. Resetting to default.`
       );
       mergedSettings.model = Models.claude;
     }
@@ -52,8 +56,11 @@ export const getSettings = (): SettingsSchema => {
   }
 };
 
-export const updateSettings = (newSettings: SettingsSchema) =>
-  window.localStorage.setItem(
-    settingsLocalStorageKey,
-    JSON.stringify(newSettings)
-  );
+export const updateSettings = (newSettings: SettingsSchema) => {
+  if (typeof window !== 'undefined') {
+    window.localStorage.setItem(
+      settingsLocalStorageKey,
+      JSON.stringify(newSettings)
+    );
+  }
+};

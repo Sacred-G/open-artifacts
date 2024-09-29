@@ -1,15 +1,16 @@
+import React, { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useEnterSubmit } from "@/lib/hooks/use-enter-submit";
 import {
   ArrowDownIcon,
   ArrowUpIcon,
   CircleStopIcon,
-  Loader2Icon,
   MicIcon,
   PaperclipIcon,
   PauseIcon,
+  FileIcon,
+  Loader2Icon,
 } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
 import Textarea from "react-textarea-autosize";
 import {
   Select,
@@ -28,10 +29,15 @@ import {
   TooltipTrigger,
 } from "@/components/ui";
 import { convertFileToBase64 } from "@/lib/utils";
+import dynamic from 'next/dynamic';
+import * as pdfjs from 'pdfjs-dist';  
+// Import PDF.js correctly
+
+pdfjs.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 
 export type Props = {
   input: string;
-  setInput: (value: string) => void;
+  setInput: React.Dispatch<React.SetStateAction<string>>;
   onSubmit: () => void;
   isLoading: boolean;
   recording: boolean;
@@ -39,13 +45,13 @@ export type Props = {
   onStopRecord: () => void;
   attachments: Attachment[];
   onRemoveAttachment: (attachment: Attachment) => void;
-  onAddAttachment: (newAttachments: Attachment[]) => void;
+  onAddAttachment: (newAttachments: (File | Attachment)[]) => void;
   showScrollButton: boolean;
   handleManualScroll: () => void;
   stopGenerating: () => void;
 };
 
-export const ChatInput = ({
+export const ChatInput: React.FC<Props> = ({
   input,
   setInput,
   onSubmit,
@@ -64,13 +70,40 @@ export const ChatInput = ({
   const { onKeyDown } = useEnterSubmit({ onSubmit });
   const [model, setModel] = useState<Models>(getSettings().model);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const pdfInputRef = useRef<HTMLInputElement>(null);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
 
-  // Handle file upload button click
+  const extractTextFromPdf = async (file: File): Promise<string> => {
+    try {
+      const pdfjsLib = await pdfjs;
+      const arrayBuffer = await file.arrayBuffer();
+      const loadingTask = pdfjsLib.getDocument({ data: arrayBuffer });
+      const pdf = await loadingTask.promise;
+      let text = '';
+
+      for (let i = 1; i <= pdf.numPages; i++) {
+        const page = await pdf.getPage(i);
+        const content = await page.getTextContent();
+        const strings = content.items.map((item: any) => item.str);
+        text += strings.join(' ') + '\n';
+      }
+
+      return text;
+    } catch (error) {
+      console.error('Error extracting text from PDF:', error);
+      throw error;
+    }
+  };
+
   const handleFileUpload = () => {
     fileInputRef.current?.click();
   };
 
-  // Handle file selection and conversion to base64
+  const handlePDFUpload = () => {
+    pdfInputRef.current?.click();
+  };
+
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
       const filesArray = Array.from(e.target.files);
@@ -85,12 +118,31 @@ export const ChatInput = ({
     }
   };
 
-  // Focus on input field when component mounts
+  const handlePDFChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      const file = e.target.files[0];
+      if (file && file.type === 'application/pdf') {
+        try {
+          setIsUploading(true);
+          const text = await extractTextFromPdf(file);
+          setInput(prevInput => `${prevInput}\nExtracted text from PDF: ${file.name}\n\n${text}`);
+          setUploadError('PDF processed successfully!');
+        } catch (error) {
+          console.error('Error processing PDF:', error);
+          setUploadError(error instanceof Error ? error.message : 'An unknown error occurred');
+        } finally {
+          setIsUploading(false);
+        }
+      } else {
+        setUploadError('Please select a valid PDF file.');
+      }
+    }
+  };
+
   useEffect(() => {
     inputRef.current?.focus();
   }, []);
 
-  // Handle model change and update settings
   const handleModelChange = (newModel: Models) => {
     setModel(newModel);
     updateSettings({ ...getSettings(), model: newModel });
@@ -110,8 +162,7 @@ export const ChatInput = ({
       )}
 
       <div className="w-full flex flex-col gap-1 bg-[#F4F4F4] p-2.5 pl-4 rounded-md border border-b-0 rounded-b-none shadow-md">
-        {/* Attachment preview */}
-        {attachments && (
+        {attachments && attachments.length > 0 && (
           <div className="flex items-center gap-2 mb-2">
             {attachments.map((attachment, index) => (
               <AttachmentPreviewButton
@@ -123,8 +174,13 @@ export const ChatInput = ({
           </div>
         )}
 
+        {uploadError && (
+          <div className={`text-sm mb-2 ${uploadError.includes('successfully') ? 'text-green-500' : 'text-red-500'}`}>
+            {uploadError}
+          </div>
+        )}
+
         <div className="flex gap-2 items-start">
-          {/* Main input textarea */}
           <Textarea
             ref={inputRef}
             tabIndex={0}
@@ -141,17 +197,25 @@ export const ChatInput = ({
             onChange={(e) => setInput(e.target.value)}
           />
 
-          {/* Hidden file input */}
           <input
             type="file"
             accept="image/*"
             multiple
-            ref={fileInputRef}
-            style={{ display: "none" }}
             onChange={handleFileChange}
+            style={{ display: 'none' }}
+            ref={fileInputRef}
+            aria-label="Attach file"
           />
 
-          {/* File upload button */}
+          <input
+            type="file"
+            accept=".pdf"
+            onChange={handlePDFChange}
+            style={{ display: 'none' }}
+            ref={pdfInputRef}
+            aria-label="Upload PDF"
+          />
+
           <Button
             variant="outline"
             size="icon"
@@ -161,7 +225,20 @@ export const ChatInput = ({
             <PaperclipIcon className="w-4 h-4" />
           </Button>
 
-          {/* Voice recording button */}
+          <Button
+            variant="outline"
+            size="icon"
+            className="w-8 h-8 bg-transparent"
+            onClick={handlePDFUpload}
+            disabled={isUploading}
+          >
+            {isUploading ? (
+              <Loader2Icon className="w-4 h-4 animate-spin" />
+            ) : (
+              <FileIcon className="w-4 h-4" />
+            )}
+          </Button>
+
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
@@ -188,7 +265,6 @@ export const ChatInput = ({
             </Tooltip>
           </TooltipProvider>
 
-          {/* Submit button */}
           <Button
             onClick={isLoading ? stopGenerating : onSubmit}
             size="icon"
@@ -202,7 +278,6 @@ export const ChatInput = ({
           </Button>
         </div>
 
-        {/* Model selection dropdown */}
         <Select value={model || undefined} onValueChange={handleModelChange}>
           <SelectTrigger className="w-fit bg-[#F4F4F4] flex items-center gap-2 border-none">
             <SelectValue placeholder="Select Model" />
