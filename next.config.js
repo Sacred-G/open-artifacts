@@ -5,10 +5,8 @@ const nextConfig = {
   webpack: (config, { isServer }) => {
     if (!isServer) {
       config.resolve.fallback = {
-        
         fs: false,
-      
-            "pdfjs-dist": require.resolve("pdfjs-dist/build/pdf.worker.entry"),
+        "pdfjs-dist": require.resolve("pdfjs-dist/build/pdf.worker.entry"),
         net: false,
         tls: false,
         canvas: false,
@@ -19,8 +17,10 @@ const nextConfig = {
 
     return config;
   },
+  // Add Tailwind CSS support
+  experimental: {
+    optimizeCss: true,
+  },
 };
-
-
 
 module.exports = nextConfig;

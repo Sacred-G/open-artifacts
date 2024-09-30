@@ -22,7 +22,7 @@ export default async function LandingPage() {
       <header className="bg-white shadow-sm sticky top-0 z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex justify-between items-center">
-            <h1 className="text-3xl font-bold text-gray-900">Open Artifacts</h1>
+            <h1 className="text-3xl font-bold text-gray-900">LegalEZ</h1>
 
             <label htmlFor="menu-toggle" className="sm:hidden cursor-pointer">
               <MenuIcon className="h-6 w-6" />
@@ -46,18 +46,18 @@ export default async function LandingPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <div className="text-center mb-12">
             <h2 className="text-4xl font-extrabold text-[#F4FFFA00] bg-clip-text bg-gradient-to-b from-gray-900 to-gray-600 sm:text-5xl md:text-6xl">
-              Create Artifacts with any LLM
+              Run reports 10x faster with AI
             </h2>
 
             <p className="mt-3 max-w-md mx-auto text-base text-gray-500 sm:text-lg md:mt-4 md:text-xl md:max-w-3xl">
-              Generate Artifacts with your own API keys.
+              LegalEZ can help you with all your legal Needs
             </p>
 
             <CTABar />
 
             <div className="mt-12 flex flex-col items-center gap-4">
               <h3 className="text-md font-medium text-gray-500 text-center">
-                Supported LLM Providers
+                Multiple AI Providers 
               </h3>
               <div className="flex flex-row items-center gap-8">
                 <Link href="https://www.anthropic.com/" target="_blank">
@@ -82,7 +82,7 @@ export default async function LandingPage() {
           </div>
           <div className="relative">
             <Image
-              src="/demo.png"
+              src="/legalez.webp"
               alt="Open Artifacts Demo"
               width={1200}
               height={675}
@@ -118,22 +118,22 @@ export default async function LandingPage() {
       <footer className="">
         <div className="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
           <p className="text-center text-base text-gray-400">
-            &copy; 2024 Open Artifacts. All rights reserved.
+            &copy; 2024 LegalEZ. All rights reserved.
           </p>
           <div className="flex flex-wrap items-center justify-center gap-1 mt-4 text-center">
             <span>Built by</span>
             <a
-              href="https://www.linkedin.com/in/13point5/"
+              href="https://www.linkedin.com/in/Sacred-G/"
               target="_blank"
               rel="noopener noreferrer"
               className="font-bold transition hover:text-gray-600 flex items-center gap-1"
             >
-              Sriraam
+              SBouldin
             </a>
             <span>|</span>
-            <span>Open Sourced on</span>
+            <span>Front-End Open Sourced On</span>
             <a
-              href="https://github.com/13point5/open-artifacts"
+              href="https://github.com/Sacred-g/open-artifacts"
               target="_blank"
               rel="noopener noreferrer"
               className="font-bold transition hover:text-gray-600 flex items-center gap-1"
@@ -163,7 +163,7 @@ const CTABar = () => (
 
     <div className="mt-3 rounded-md shadow sm:mt-0 sm:ml-3">
       <a
-        href="https://github.com/13point5/open-artifacts"
+        href="https://github.com/Sacred-g/open-artifacts"
         target="_blank"
         rel="noopener noreferrer"
       >

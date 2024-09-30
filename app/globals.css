@@ -4,7 +4,7 @@
 
 @layer base {
   :root {
-    --background: 113 122 23 0% 100%;
+    --background: 113 12 23 0% 100%;
     --foreground: 123.2 84% 4.9%;
     --card: 0 0% 100%;
     --card-foreground: 222.2 84% 4.9%;
@@ -78,3 +78,25 @@
   background:lightsteelblue;
   flex-grow:1;
 }
+
+.pb-4 {
+  padding-bottom: 1rem;
+  background: skyblue;}
+
+  .pl-0 {
+    padding-left: 0px;
+    background: rgb(89, 95, 101);
+  }  
+  .data-\[state\=open\]\:slide-in-from-top-\[48\%\][data-state="open"] {
+    --tw-enter-translate-y: -48%;
+    background: aliceblue;}
+    .py-2 {
+      padding-top: 0.5rem;
+      padding-bottom: 0.5rem;
+   
+    }
+
+    .p-4 {
+      padding: 1rem;
+      background: lightgoldenrodyellow;
+    }

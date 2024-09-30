@@ -20,10 +20,9 @@ import { useScrollAnchor } from "@/lib/hooks/use-scroll-anchor";
 import { useFakeWhisper } from "@/lib/hooks/use-fake-whisper";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-
+import  React  from "react"
 import * as pdfjs from 'pdfjs-dist';
 
-// Update the worker source path
 pdfjs.GlobalWorkerOptions.workerSrc = '/pdf.worker.min.js';
 
 type Props = {
@@ -31,7 +30,6 @@ type Props = {
   pdfContext?: { content: string; name: string } | null;
 };
 
-// Update PDF file paths
 const PDF_FILES = [
   { name: 'SCHEDULE FOR RATING PERMANENT DISABILITIES', path: '/pdr1997.pdf' },
   { name: 'PDIndemnityChart', path: '/PDIndemnityChart2021.pdf' },
@@ -51,6 +49,7 @@ export const ChatPanel = ({ id }: Props) => {
   const [selectedArtifacts, setSelectedArtifacts] = useState<string[]>([]);
   const [pdfContext, setPdfContext] = useState<{ content: string; name: string } | null>(null);
   const [selectedPdf, setSelectedPdf] = useState<string | null>(null);
+  const [isCreatingChat, setIsCreatingChat] = useState(false);
 
   const fetchMessages = useCallback(async () => {
     if (chatId) {
@@ -61,7 +60,7 @@ export const ChatPanel = ({ id }: Props) => {
           messages.map((message) => ({
             id: String(message.id),
             role: message.role as Message["role"],
-            content: message.content, // Changed from message.text to message.content
+            content: message.content,
             experimental_attachments: (message.attachments as Attachment[]) || [],
           }))
         );
@@ -97,7 +96,6 @@ export const ChatPanel = ({ id }: Props) => {
       setSelectedPdf(pdfPath);
       toast.success(`PDF "${pdfName}" loaded successfully. Context added for AI.`);
 
-      // Create an automatic message
       const automaticMessage: Message = {
         id: Date.now().toString(),
         role: "assistant",
@@ -106,12 +104,16 @@ export const ChatPanel = ({ id }: Props) => {
     
       if (chatId) {
         await addMessage(supabase, chatId, automaticMessage);
-      } else {
-        // If there's no chat yet, create a new one
-        const newChat = await createChat(supabase, `Chat about ${pdfName}`, session?.user.id);
-        setChatId(newChat.id);
-        await addMessage(supabase, newChat.id, automaticMessage);
-        router.push(`/chat/${newChat.id}`);
+      } else if (!isCreatingChat) {
+        setIsCreatingChat(true);
+        try {
+          const newChat = await createChat(supabase, `Chat about ${pdfName}`, session?.user.id);
+          setChatId(newChat.id);
+          await addMessage(supabase, newChat.id, automaticMessage);
+          router.push(`/chat/${newChat.id}`);
+        } finally {
+          setIsCreatingChat(false);
+        }
       }
     } catch (error) {
       console.error('Error reading PDF:', error);
@@ -136,7 +138,6 @@ export const ChatPanel = ({ id }: Props) => {
       const data = await response.json();
       toast.success(`PDF "${data.pdf.filename}" uploaded successfully.`);
 
-      // Load the PDF content
       const arrayBuffer = await file.arrayBuffer();
       const pdfDocument = await pdfjs.getDocument({ data: arrayBuffer }).promise;
       let fullText = '';
@@ -154,7 +155,6 @@ export const ChatPanel = ({ id }: Props) => {
       setPdfContext({ content: fullText, name: data.pdf.filename });
       setSelectedPdf(data.pdf.filename);
 
-      // Create an automatic message
       const automaticMessage: Message = {
         id: Date.now().toString(),
         role: "assistant",
@@ -163,12 +163,16 @@ export const ChatPanel = ({ id }: Props) => {
     
       if (chatId) {
         await addMessage(supabase, chatId, automaticMessage);
-      } else {
-        // If there's no chat yet, create a new one
-        const newChat = await createChat(supabase, `Chat about ${data.pdf.filename}`, session?.user.id);
-        setChatId(newChat.id);
-        await addMessage(supabase, newChat.id, automaticMessage);
-        router.push(`/chat/${newChat.id}`);
+      } else if (!isCreatingChat) {
+        setIsCreatingChat(true);
+        try {
+          const newChat = await createChat(supabase, `Chat about ${data.pdf.filename}`, session?.user.id);
+          setChatId(newChat.id);
+          await addMessage(supabase, newChat.id, automaticMessage);
+          router.push(`/chat/${newChat.id}`);
+        } finally {
+          setIsCreatingChat(false);
+        }
       }
     } catch (error) {
       console.error('Error uploading PDF:', error);
@@ -187,9 +191,19 @@ export const ChatPanel = ({ id }: Props) => {
       title: string;
       firstMessage: Message;
       secondMessage: Message;
-    }) => await createChat(supabase, title, session?.user.id),
+    }) => {
+      if (isCreatingChat) return null;
+      setIsCreatingChat(true);
+      try {
+        return await createChat(supabase, title, session?.user.id);
+      } finally {
+        setIsCreatingChat(false);
+      }
+    },
     onSuccess: async (newChat, { firstMessage, secondMessage }) => {
+      if (!newChat) return;
       queryClient.setQueryData<Chat[]>(["chats"], (oldChats) => {
+        if (oldChats?.some(chat => chat.id === newChat.id)) return oldChats;
         return [...(oldChats || []), newChat];
       });
       setChatId(newChat.id);
@@ -221,14 +235,14 @@ export const ChatPanel = ({ id }: Props) => {
   const { messagesRef, scrollRef, showScrollButton, handleManualScroll } = useScrollAnchor(messages);
 
   useEffect(() => {
-    if (!chatId && messages.length === 2 && !generatingResponse) {
+    if (!chatId && messages.length === 2 && !generatingResponse && !isCreatingChat) {
       createChatMutation.mutate({
         title: messages[0].content.slice(0, 100),
         firstMessage: messages[0],
         secondMessage: messages[1],
       });
     }
-  }, [chatId, messages, generatingResponse, createChatMutation]);
+  }, [chatId, messages, generatingResponse, createChatMutation, isCreatingChat]);
 
   const whisperHookProps = settings.openaiApiKey 
     ? { apiKey: settings.openaiApiKey }
@@ -263,16 +277,13 @@ export const ChatPanel = ({ id }: Props) => {
       prev.concat(
         newAttachments.map(attachment => {
           if ('url' in attachment && 'contentType' in attachment) {
-            // This is an Attachment
             return attachment as Attachment;
           } else if (attachment instanceof File) {
-            // This is a File
             return {
               url: URL.createObjectURL(attachment),
               contentType: attachment.type
             };
           } else {
-            // This should never happen, but TypeScript requires us to handle this case
             console.error('Invalid attachment type:', attachment);
             return null;
           }

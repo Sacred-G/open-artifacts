@@ -7,7 +7,7 @@
 
 Open Artifacts is a free, open-source project that clones the functionality of [Claude](https://claude.ai) while supporting the generation of Artifacts with [Anthropic](https://www.anthropic.com/) and [OpenAI](https://openai.com/) LLMs using the user's API keys.
 
-The Artifact viewer is implemented using [Open Artifacts Renderer](https://github.com/13point5/open-artifacts-renderer).
+The Artifact viewer is implemented using [Open Artifacts Renderer](https://github.com/Sacred-g/open-artifacts-renderer).
 
 ## Features
 
@@ -82,7 +82,7 @@ The Artifact viewer is implemented using [Open Artifacts Renderer](https://githu
    npm run dev
    ```
 
-1. Setup [Open Artifacts Renderer](https://github.com/13point5/open-artifacts-renderer) and set the `NEXT_PUBLIC_ARTIFACT_RENDERER_URL` env variable to the URL of the renderer.
+1. Setup [Open Artifacts Renderer](https://github.com/Sacred-g/open-artifacts-renderer) and set the `NEXT_PUBLIC_ARTIFACT_RENDERER_URL` env variable to the URL of the renderer.
 
    ```
    NEXT_PUBLIC_ARTIFACT_RENDERER_URL=
